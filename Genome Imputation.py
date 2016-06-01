@@ -82,7 +82,6 @@ def knnImputation(train, test, k):
     # for every individual, find k nearest neighbor and take the majority value of its neighbors
     print("Imputing...")
     for ind in range(test.shape[1]):
-        print("Calculating Distance...")
         dist = calculateDistance(train, test.iloc[:,ind])
         closest = dist.argsort()[-k:]
         fillMissing(train, closest, test.iloc[:,ind])
@@ -113,18 +112,17 @@ if __name__ == "__main__":
     f = open('results.txt', 'a')
     for trainCount in sets:
         train, test_b, actual = createCrossValSet(original, trainCount)
-        test_k = test_b.copy()
-        baselineImputation(train, test_b)
-        res_b = calculateAccuracy(actual, test_b)
-        baseline_results.append(res_b)
-        f.write(str(trainCount)+' SNPs Baseline Accuracy: '+str(res_b))
-        
         for idx, k in enumerate(neighbors):
+            test_k = test_b.copy()
             knnImputation(train, test_k, k)
             res_k = calculateAccuracy(actual, test_k)
             knn_results[idx].append(res_k)
-            f.write(str(trainCount) + ' SNPs KNN Accuracy: ' + str(k) + ': ' + str(res_k))
-            
+            f.write(str(trainCount) + ' SNPs KNN Accuracy: ' + str(k) + ': ' + str(res_k) + '\n')
+        baselineImputation(train, test_b)
+        res_b = calculateAccuracy(actual, test_b)
+        baseline_results.append(res_b)
+        f.write(str(trainCount)+' SNPs Baseline Accuracy: '+str(res_b) + '\n')
+        
     plotAccuracy(baseline_results, knn_results, sets)
 
 
